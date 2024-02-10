@@ -1,4 +1,4 @@
-package provided.entity;
+package recipes.entity;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -51,7 +51,7 @@ public class Recipe {
 	private List<Step> steps = new LinkedList<>();
 	private List<Category> categories = new LinkedList<>();
 
-	public Integer getRecipe_id() {
+	public Integer getRecipeId() {
 		return recipeId;
 	}
 

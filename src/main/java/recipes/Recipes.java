@@ -1,23 +1,24 @@
 package recipes;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-import provided.entity.Recipe;
+import recipes.entity.Ingredient;
+import recipes.entity.Recipe;
+import recipes.entity.Unit;
 import recipes.exception.DbException;
 import recipes.service.RecipeService;
 
 public class Recipes {
 	private Scanner scanner = new Scanner(System.in);
+	private Recipe curRecipe;
 	private RecipeService recipeService = new RecipeService();
 	// @formatter : off
-	private List<String> operations = List.of(
-			"1) Create and populate all tables",
-			"2) Add a recipe"
-			);
-			
+	private List<String> operations = List.of("1) Create and populate all tables", "2) Add a recipe", "3) List recipes",
+			"4) Select working recipe", "5) Add ingredient to current recipe");
 
 // @formatter : on
 
@@ -30,7 +31,7 @@ public class Recipes {
 		boolean done = false;
 
 		while (!done) {
-			try {	
+			try {
 				int operation = getOperation();
 				switch (operation) {
 				case -1:
@@ -43,42 +44,109 @@ public class Recipes {
 				case 2:
 					addRecipe();
 					break;
+				case 3:
+					listRecipes();
+					break;
+				case 4:
+					setCurrentRecipe();
+					break;
+				case 5:
+					addIngredientToCurrentRecipe();
+					break;
 				default:
 					System.out.println("\n" + operation + " is not valid. Please try again.");
 					break;
 				}
 			} catch (Exception e) {
-				System.out.println("\nError!: " + e.toString() + " try again.");
+				System.out.println("\nError!: " + e.toString() + "  is not valid. Please try again.");
 			}
 		}
 	}
 
+	private void addIngredientToCurrentRecipe() {
+		if (Objects.isNull(curRecipe)) {
+			System.out.println("\nPlease select a recipe.");
+			return;
+		}
+		String name = getStringInput("Enter the ingredient name.");
+		String instruction = getStringInput("Enter any instructions");
+		Double inputAmount = getDoubleInput("Enter ingredient amount.");
+		List<Unit> units = recipeService.fetchUnits();
+
+		BigDecimal amount = Objects.isNull(inputAmount) ? null : new BigDecimal(inputAmount).setScale(2);
+
+		System.out.println("Units: ");
+
+		units.forEach(unit -> System.out
+				.println("      " + unit.getUnitNameSingular() + "( " + unit.getUnitNamePlural() + ")"));
+		
+		Integer unitId = getIntInput("Enter a unit ID (press Enter for none)");
+		
+		Unit unit = new Unit();
+		unit.setUnitId(unitId);
+		
+		Ingredient ingredient = new Ingredient();
+		ingredient.setRecipeId(curRecipe.getRecipeId());
+		ingredient.setUnit(unit);
+		ingredient.setIngredientName(name);
+		ingredient.setInstruction(instruction);
+		ingredient.setAmount(amount);
+		
+		recipeService.addIngredient(ingredient);
+		curRecipe = recipeService.fetchRecipeById(ingredient.getRecipeId());
+	}
+
+	private void setCurrentRecipe() {
+		List<Recipe> recipes = listRecipes();
+
+		Integer recipeId = getIntInput("Select a recipe ID");
+		for (Recipe recipe : recipes) {
+			if (recipe.getRecipeId().equals(recipeId)) {
+				curRecipe = recipeService.fetchRecipeById(recipeId);
+				break;
+			}
+		}
+
+		if (Objects.isNull(curRecipe)) {
+			System.out.println("\nInvalid recipe ID");
+		}
+	}
+
+	private List<Recipe> listRecipes() {
+		List<Recipe> recipes = recipeService.fetchRecipes();
+		System.out.println("\nRecipes: ");
+		recipes.forEach(recipe -> System.out.println("     " + recipe.getRecipeId() + ": " + recipe.getRecipeName()));
+		return recipes;
+	}
+
 	private void addRecipe() {
-String name = getStringInput("Enter the recipe name");		
-String notes = getStringInput("Enter recipe notes");
-Integer numServings = getIntInput("Enter number of servings");
-Integer prepMinutes = getIntInput("Enter the prep time in minutes");
-Integer cookMinutes = getIntInput("Enter the cook time in minutes");
+		String name = getStringInput("Enter the recipe name");
+		String notes = getStringInput("Enter recipe notes");
+		Integer numServings = getIntInput("Enter number of servings");
+		Integer prepMinutes = getIntInput("Enter the prep time in minutes");
+		Integer cookMinutes = getIntInput("Enter the cook time in minutes");
 
-LocalTime prepTime = minutesToLocalTime(prepMinutes);
-LocalTime cookTime = minutesToLocalTime(cookMinutes);
+		LocalTime prepTime = minutesToLocalTime(prepMinutes);
+		LocalTime cookTime = minutesToLocalTime(cookMinutes);
 
-Recipe recipe = new Recipe();
-recipe.setRecipeName(name);
-recipe.setNotes(notes);
-recipe.setNumServings(numServings);
-recipe.setPrepTime(prepTime);
-recipe.setCookTime(cookTime);
+		Recipe recipe = new Recipe();
+		recipe.setRecipeName(name);
+		recipe.setNotes(notes);
+		recipe.setNumServings(numServings);
+		recipe.setPrepTime(prepTime);
+		recipe.setCookTime(cookTime);
 
-Recipe dbRecipe = recipeService.addRecipe(recipe);
-System.out.println(dbRecipe + " added");
+		Recipe dbRecipe = recipeService.addRecipe(recipe);
+		System.out.println(dbRecipe + " added");
+
+		Recipe curRecipe = recipeService.fetchRecipeById(dbRecipe.getRecipeId());
 	}
 
 	private LocalTime minutesToLocalTime(Integer numMinutes) {
 		int min = Objects.isNull(numMinutes) ? 0 : numMinutes;
 		int hours = min / 60;
 		int minutes = min % 60;
-		
+
 		return LocalTime.of(hours, minutes);
 	}
 
@@ -104,7 +172,13 @@ System.out.println(dbRecipe + " added");
 		System.out.println("Here's what you can do: ");
 
 		operations.forEach(op -> System.out.println("   " + op));
+	
+	if (Objects.isNull(curRecipe)) {
+		System.out.println("\nYou are not working with a recipe.");
+	} else {
+		System.out.println("\nYou are working with recipe " + curRecipe);
 	}
+}
 
 	private Integer getIntInput(String prompt) {
 		String input = getStringInput(prompt);
@@ -115,6 +189,20 @@ System.out.println(dbRecipe + " added");
 
 		try {
 			return Integer.parseInt(input);
+		} catch (NumberFormatException e) {
+			throw new DbException(input + " is not a valid number.");
+		}
+	}
+	
+	private Double getDoubleInput(String prompt) {
+		String input = getStringInput(prompt);
+
+		if (Objects.isNull(input)) {
+			return null;
+		}
+
+		try {
+			return Double.parseDouble(input);
 		} catch (NumberFormatException e) {
 			throw new DbException(input + " is not a valid number.");
 		}

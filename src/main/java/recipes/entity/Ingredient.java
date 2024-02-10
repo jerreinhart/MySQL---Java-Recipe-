@@ -1,12 +1,15 @@
-package provided.entity;
+package recipes.entity;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import provided.entity.EntityBase;
 
 public class Ingredient extends EntityBase {
 	private Integer ingredientId;
 	private Integer recipeId;
 	private Unit unit;
+
 	private String ingredientName;
 	private String instruction;
 	private Integer ingredientOrder;
@@ -53,6 +56,14 @@ public class Ingredient extends EntityBase {
 
 	public void setUnitId(Unit unitId) {
 		this.unit = unitId;
+	}
+
+	public Unit getUnit() {
+		return unit;
+	}
+
+	public void setUnit(Unit unit) {
+		this.unit = unit;
 	}
 
 	public String getIngredientName() {

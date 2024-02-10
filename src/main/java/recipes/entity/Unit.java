@@ -1,4 +1,4 @@
-package provided.entity;
+package recipes.entity;
 
 public class Unit {
 	private Integer unitId;

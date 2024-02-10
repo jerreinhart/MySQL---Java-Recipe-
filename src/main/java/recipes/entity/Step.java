@@ -1,4 +1,4 @@
-package provided.entity;
+package recipes.entity;
 
 public class Step {
 	private Integer stepId;

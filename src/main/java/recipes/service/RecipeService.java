@@ -1,14 +1,19 @@
 package recipes.service;
 
 import java.io.IOException;
+
+import recipes.entity.Ingredient;
+import recipes.entity.Recipe;
+import recipes.entity.Unit;
+
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-import provided.entity.Recipe;
 import recipes.dao.RecipeDao;
 import recipes.exception.DbException;
 
@@ -16,6 +21,11 @@ public class RecipeService {
 	private static final String SCHEMA_FILE = "recipe_schema.sql";
 	private static final String DATA_FILE = "recipe_data.sql";
 	private RecipeDao recipeDao = new RecipeDao();
+
+	public Recipe fetchRecipeById(Integer recipeId) {
+		return recipeDao.fetchRecipeById(recipeId)
+				.orElseThrow(() -> new NoSuchElementException("Recipe with ID = " + recipeId + " does not exist."));
+	}
 
 	public void createAndPopulateTables() {
 		loadFromFile(SCHEMA_FILE);
@@ -92,5 +102,18 @@ public class RecipeService {
 
 	public Recipe addRecipe(Recipe recipe) {
 		return recipeDao.insertRecipe(recipe);
+	}
+
+	public List<Recipe> fetchRecipes() {
+		return recipeDao.fetchAllRecipes();
+	}
+
+	public List<Unit> fetchUnits() {
+		return recipeDao.fetchAllUnits();
+	}
+
+	public void addIngredient(Ingredient ingredient) {
+		// TODO Auto-generated method stub
+		
 	}
 }
