@@ -31,7 +31,7 @@ public class Ingredient extends EntityBase {
 			b.append(", ").append(instruction);
 		}
 
-		return super.toString();
+		return b.toString();
 	}
 
 	public Integer getIngredientId() {

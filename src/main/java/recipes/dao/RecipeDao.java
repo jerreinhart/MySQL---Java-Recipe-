@@ -27,7 +27,7 @@ public class RecipeDao extends DaoBase {
 	private static final String CATEGORY_TABLE = "category";
 	private static final String INGREDIENT_TABLE = "ingredient";
 	private static final String RECIPE_TABLE = "recipe";
-	private static final String RECIPE_CATEGORY = "recipe_category";
+	private static final String RECIPE_CATEGORY_TABLE = "recipe_category";
 	private static final String STEP_TABLE = "step";
 	private static final String UNIT_TABLE = "unit";
 
@@ -69,7 +69,7 @@ public class RecipeDao extends DaoBase {
 		//@formatter:off
 		String sql = ""
 				+ "SELECT c. * "
-				+"FROM " +RECIPE_CATEGORY + " rc "
+				+"FROM " +RECIPE_CATEGORY_TABLE + " rc "
 				+ "JOIN " + CATEGORY_TABLE + " c USING (category_id) "
 				+ "WHERE recipe_id = ? "
 				+ "ORDER BY c.category_name ";
@@ -110,7 +110,7 @@ public class RecipeDao extends DaoBase {
 		String sql = ""
 				+ "SELECT i.* , u.unit_name_singular, u.unit_name_plural "
 						+ "FROM " + INGREDIENT_TABLE + " i "
-						+ "LEFT JOIN " + UNIT_TABLE +" u USING (unit_id) "
+						+ "LEFT JOIN " + UNIT_TABLE + " u USING (unit_id) "
 						+ "WHERE recipe_id = ? "
 						+ "ORDER BY i.ingredient_order";
 				//@formatter:on
@@ -247,7 +247,7 @@ public class RecipeDao extends DaoBase {
 
 				try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 					setParameter(stmt, 1, ingredient.getRecipeId(), Integer.class);
-					setParameter(stmt, 2, ingredient.getUnitId(), Integer.class);
+					setParameter(stmt, 2, ingredient.getUnit().getUnitId(), Integer.class);
 					setParameter(stmt, 3, ingredient.getIngredientName(), String.class);
 					setParameter(stmt, 4, ingredient.getInstruction(), String.class);
 					setParameter(stmt, 5, order, Integer.class);

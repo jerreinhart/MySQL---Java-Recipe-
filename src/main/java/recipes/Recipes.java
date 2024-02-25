@@ -19,12 +19,19 @@ public class Recipes {
 	private Recipe curRecipe;
 	private RecipeService recipeService = new RecipeService();
 
-	// @formatter : off
-	private List<String> operations = List.of("1) Create and populate all tables", "2) Add a recipe", "3) List recipes",
-			"4) Select working recipe", "5) Add ingredient to current recipe", "6) Add step to current recipe",
-			"7) Add category to current recipe", "8) Modify step in current recipe", "9) Delete a recipe");
+	// @formatter:off
+	private List<String> operations = List.of(
+			"1) Create and populate all tables", 
+			"2) Add a recipe", 
+			"3) List recipes",
+			"4) Select working recipe", 
+			"5) Add ingredient to current recipe", 
+			"6) Add step to current recipe",
+			"7) Add category to current recipe", 
+			"8) Modify step in current recipe", 
+			"9) Delete a recipe");
 
-// @formatter : on
+// @formatter:on
 
 	public static void main(String[] args) {
 		new Recipes().displayMenu();
@@ -82,10 +89,10 @@ public class Recipes {
 	private void deleteRecipe() {
 		listRecipes();
 		Integer recipeId = getIntInput("Select the recipe you would like to delete");
-		if(Objects.nonNull(recipeId)) {
+		if (Objects.nonNull(recipeId)) {
 			recipeService.deleteRecipe(recipeId);
-			
-			if(Objects.nonNull(curRecipe) && curRecipe.getRecipeId().equals(recipeId)) {
+
+			if (Objects.nonNull(curRecipe) && curRecipe.getRecipeId().equals(recipeId)) {
 				curRecipe = null;
 			}
 		}
@@ -166,14 +173,14 @@ public class Recipes {
 
 		System.out.println("Units: ");
 
-		units.forEach(unit -> System.out
-				.println("      " + unit.getUnitNameSingular() + "( " + unit.getUnitNamePlural() + ")"));
+		units.forEach(unit -> System.out.println("      " + unit.getUnitId() + ":  " + unit.getUnitNameSingular() + "( "
+				+ unit.getUnitNamePlural() + ")"));
 
 		Integer unitId = getIntInput("Enter a unit ID (press Enter for none)");
 
 		Unit unit = new Unit();
 		unit.setUnitId(unitId);
-
+		//System.out.println(unitId);
 		Ingredient ingredient = new Ingredient();
 		ingredient.setRecipeId(curRecipe.getRecipeId());
 		ingredient.setUnit(unit);
